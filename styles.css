@@ -545,3 +545,31 @@ body.tutorial-open {
     font-size: 8px;
   }
 }
+
+
+/* HOW TO PLAY button positioning */
+
+/* Desktop: top-right corner */
+@media (min-width: 861px) {
+  #tutorial-toggle.tutorial-toggle {
+    position: fixed;
+    top: 80px;
+    right: 35px;
+    bottom: auto;
+    left: auto;
+    z-index: 100;
+  }
+}
+
+/* Mobile: keep its current bottom-right position */
+@media (max-width: 860px) {
+  #tutorial-toggle.tutorial-toggle {
+    position: fixed;
+    top: auto;
+    bottom: 18px;
+    right: 18px;
+    left: auto;
+    z-index: 100;
+  }
+}
+
