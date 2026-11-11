@@ -329,8 +329,8 @@
 .tutorial-close{position:absolute;top:8px;right:8px;border:0;background:#4b5149;color:#fff0d8;width:28px;height:28px;cursor:pointer;font-family:'Press Start 2P',monospace;font-size:10px;box-shadow:0 3px 0 #2b3029}
 .tutorial-sidecard.tutorial-hidden{display:none}
 @media(max-width:1024px){.tutorial-sidecard{width:300px;right:18px;top:64px}.tutorial-toggle{right:18px}}
-@media(max-width:860px){.scene-home{padding-bottom:350px}.tutorial-sidecard{top:auto;right:18px;left:18px;bottom:16px;width:auto;max-width:none}.tutorial-toggle{top:auto;bottom:18px;right:18px}.home-copy{max-width:100%;padding-right:7%}}
-@media(max-width:650px){.scene-home{padding-bottom:420px}.tutorial-sidecard{left:12px;right:12px;bottom:12px;padding:12px}.tutorial-sidecard h2{font-size:12px}.tutorial-copy,.tutorial-footnote{font-size:9px}.tutorial-toggle{bottom:14px;right:14px;font-size:7px;padding:9px 11px}}
+@media(max-width:860px){}.tutorial-sidecard{top:auto;right:18px;left:18px;bottom:16px;width:auto;max-width:none}.tutorial-toggle{top:auto;bottom:18px;right:18px}.home-copy{max-width:100%;padding-right:7%}}
+@media(max-width:650px){}.tutorial-sidecard{left:12px;right:12px;bottom:12px;padding:12px}.tutorial-sidecard h2{font-size:12px}.tutorial-copy,.tutorial-footnote{font-size:9px}.tutorial-toggle{bottom:14px;right:14px;font-size:7px;padding:9px 11px}}
 
 
 /* slower answer fade-in */
@@ -443,3 +443,105 @@
 @keyframes customFloat{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-150px);opacity:0}}
 @keyframes customFade{0%{opacity:1}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.custom-death-scene.active,.custom-death-scene .death-story-art{animation:none!important}}
+
+
+
+/* FULL-SCREEN TUTORIAL */
+
+/* Keep the page from scrolling while open */
+body.tutorial-open {
+  overflow: hidden;
+}
+
+/* Dark background over the game */
+#tutorial-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+
+#tutorial-backdrop.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Centered tutorial popup */
+#home-tutorial.tutorial-sidecard {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 470px);
+  max-width: 470px;
+  max-height: 85vh;
+  overflow-y: auto;
+  z-index: 9999;
+  padding: 25px;
+  box-sizing: border-box;
+}
+
+/* Close button */
+#home-tutorial .tutorial-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Got It button */
+#tutorial-got-it {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px 10px;
+  background: #a85d35;
+  color: #fff3dc;
+  border: 0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  line-height: 1.8;
+  cursor: pointer;
+}
+
+/* Reopen tutorial button */
+#tutorial-toggle.tutorial-toggle {
+  position: fixed;
+  top: auto;
+  bottom: 18px;
+  right: 18px;
+  z-index: 100;
+}
+
+/* Keep hidden states working */
+#home-tutorial.tutorial-hidden,
+#tutorial-toggle.hidden-tutorial-toggle {
+  display: none;
+}
+
+/* Mobile adjustments */
+@media (max-width: 650px) {
+  #home-tutorial.tutorial-sidecard {
+    width: 92vw;
+    max-width: 92vw;
+    padding: 20px 16px;
+    max-height: 85dvh;
+  }
+
+  #home-tutorial h2 {
+    font-size: 13px;
+  }
+
+  #home-tutorial .tutorial-copy {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  #tutorial-got-it {
+    font-size: 8px;
+  }
+}
