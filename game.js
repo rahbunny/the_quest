@@ -430,7 +430,7 @@ function showHubPanel(panel){
       const url=location.origin+location.pathname;
       let copied=false;
       try{
-        await navigator.clipboard.writeText(`I explored ${EDITION.title}! ${url}`);
+        await navigator.clipboard.writeText(`I explored ${EDITION.title}!Think you can survive the forest and find a legendary treasure? Try your luck! ${url}. Also check out this month's newsletter @https://gtmsa.substack.com/`);
         copied=true;
       }catch(err){
         // Do not mark the link as copied when the clipboard write failed.
