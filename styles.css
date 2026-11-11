@@ -573,3 +573,56 @@ body.tutorial-open {
   }
 }
 
+/* SUBTLE RETRY HINT ABOVE SHARE BUTTON */
+
+.hub-actions [data-hub-panel="share"] {
+  position: relative;
+}
+
+/* The hint only exists when this class is added */
+.hub-actions [data-hub-panel="share"].show-retry-hint::before {
+  content: "RETRY INFO HERE! ↓";
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+
+  color: #f0c27d;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  line-height: 1.7;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 2px 2px 3px #000;
+
+  pointer-events: none;
+  animation: retryHintBounce 2s ease-in-out infinite;
+}
+
+/* Very small up-and-down movement */
+@keyframes retryHintBounce {
+  0%, 100% {
+    transform: translate(-50%, 0);
+  }
+
+  50% {
+    transform: translate(-50%, -5px);
+  }
+}
+
+/* Slightly smaller on phones */
+@media (max-width: 650px) {
+  .hub-actions [data-hub-panel="share"].show-retry-hint::before {
+    font-size: 6px;
+    white-space: normal;
+    width: 125px;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .hub-actions [data-hub-panel="share"].show-retry-hint::before {
+    animation: none;
+  }
+}
+
