@@ -43,6 +43,9 @@
           <h2>Learn the forest fast.</h2>
           <p class="tutorial-copy">Pick choices to explore the story and try to earn a collectible reward. Different paths can lead to different rankings — but be careful: the forest can make you perish, and then you'll have to try again after the cooldown.</p>
           <p class="tutorial-footnote">Tip: close this guide anytime and reopen it with the “HOW TO PLAY ?” button.</p>
+          <button id="tutorial-got-it" type="button">
+  GOT IT — LET'S PLAY!
+</button>
         </aside>
 
       </div>
@@ -115,30 +118,61 @@
   <script src="quest.js"></script>
   <script src="game.js"></script>
   <script src="auth.js"></script>
+   
+<script>
+(function () {
+  document.addEventListener('DOMContentLoaded', () => {
+    const panel = document.getElementById('home-tutorial');
+    const toggle = document.getElementById('tutorial-toggle');
+    const close = document.getElementById('tutorial-close');
+    const gotIt = document.getElementById('tutorial-got-it');
 
-  <script>
-    (function(){
-      const TUTORIAL_KEY='thequest_tutorial_hidden_v1';
-      function updateTutorial(open){
-        const panel=document.getElementById('home-tutorial');
-        const toggle=document.getElementById('tutorial-toggle');
-        if(!panel||!toggle) return;
-        panel.classList.toggle('tutorial-hidden',!open);
-        toggle.classList.toggle('hidden-tutorial-toggle',open);
-        toggle.setAttribute('aria-expanded',String(open));
+    if (!panel || !toggle || !close || !gotIt) return;
+
+    // Move the popup outside the game scene.
+    // This prevents it from being cut off on phones.
+    document.body.appendChild(panel);
+    document.body.appendChild(toggle);
+
+    // Create the dark background behind the popup.
+    const backdrop = document.createElement('div');
+    backdrop.id = 'tutorial-backdrop';
+    document.body.appendChild(backdrop);
+
+    function openTutorial() {
+      panel.classList.remove('tutorial-hidden');
+      backdrop.classList.add('visible');
+      toggle.classList.add('hidden-tutorial-toggle');
+      toggle.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('tutorial-open');
+      gotIt.focus();
+    }
+
+    function closeTutorial() {
+      panel.classList.add('tutorial-hidden');
+      backdrop.classList.remove('visible');
+      toggle.classList.remove('hidden-tutorial-toggle');
+      toggle.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('tutorial-open');
+      toggle.focus();
+    }
+
+    // Start closed, then appear after 2 seconds.
+    panel.classList.add('tutorial-hidden');
+
+    setTimeout(() => {
+      const home = document.getElementById('screen-home');
+      if (home && home.classList.contains('active')) {
+        openTutorial();
       }
-      document.addEventListener('DOMContentLoaded',()=>{
-        const panel=document.getElementById('home-tutorial');
-        const toggle=document.getElementById('tutorial-toggle');
-        const close=document.getElementById('tutorial-close');
-        if(!panel||!toggle||!close) return;
-        const hidden=localStorage.getItem(TUTORIAL_KEY)==='1';
-        updateTutorial(!hidden);
-        close.addEventListener('click',()=>{ localStorage.setItem(TUTORIAL_KEY,'1'); updateTutorial(false); });
-        toggle.addEventListener('click',()=>{ localStorage.removeItem(TUTORIAL_KEY); updateTutorial(true); });
-      });
-    })();
-  </script>
+    }, 2000);
+
+    close.addEventListener('click', closeTutorial);
+    gotIt.addEventListener('click', closeTutorial);
+    toggle.addEventListener('click', openTutorial);
+  });
+})();
+</script>
 
 </body>
 </html>
