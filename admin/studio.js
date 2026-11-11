@@ -83,11 +83,58 @@ say(filled?'● Missing Autumn defaults loaded — click Save Draft to keep them
 }
 function render(){if(!config)return;const t=config.theme||={};$('edition-title').value=config.title||'';$('edition-season').value=config.season||'other';$('accent-color').value=/^#[0-9a-fA-F]{6}$/.test(t.accent)?t.accent:'#c46b3c';$('background-color').value=/^#[0-9a-fA-F]{6}$/.test(t.background)?t.background:'#171b22';$('edition-description').value=t.description||'';renderNodePickers();renderNode();renderCopy();renderRewards();renderArt();renderMap();renderPalette();renderAppearance();renderCast();if(tab==='guild'){loadGuild();loadRunHistory();}if(tab==='preview')renderPreviewOpening();}
 function renderNodePickers(){for(const id of ['node-picker','start-node','art-scene']){const select=$(id),previous=id==='node-picker'?nodeKey:id==='start-node'?config.start_node:select.value;select.innerHTML='';for(const [key,node] of Object.entries(config.nodes)){const o=document.createElement('option');o.value=key;o.textContent=`${node.title||key} (${key})`;select.append(o);}select.value=previous;if(!select.value&&select.options.length)select.selectedIndex=0;}nodeKey=$('node-picker').value;}
+const DEATH_ANIMATIONS=[['fade','Fade to black'],['walk-away','Walk away'],['shake','Shake'],['fall','Fall / collapse'],['spin','Dizzy spin'],['flash','Flash'],['float','Float away']];
+function deathSceneFields(entry){
+  entry.deathScene ||= {title:'',text:'',image:'',animation:'fade',duration:3500};
+  const data=entry.deathScene;
+  const panel=document.createElement('div');panel.className='death-editor';
+  const heading=document.createElement('h4');heading.textContent='☠ Personalized BAD ending';panel.append(heading);
+  const explanation=document.createElement('p');explanation.className='hint';explanation.textContent='Shown before the regular YOU PERISHED scene. Leave fields blank to skip it.';panel.append(explanation);
+  function makeField(name,value,isLong=false){
+    const label=document.createElement('label');label.textContent=name;
+    const input=document.createElement(isLong?'textarea':'input');if(isLong)input.rows=3;
+    input.value=value||'';label.append(input);panel.append(label);return input;
+  }
+  const title=makeField('Custom death title',data.title);
+  title.addEventListener('input',()=>{data.title=title.value;mark();});
+  const message=makeField('Custom witty message',data.text,true);
+  message.addEventListener('input',()=>{data.text=message.value;mark();});
+  const art=makeField('Image / GIF URL (or assets/ path)',data.image);
+  art.addEventListener('input',()=>{data.image=art.value;mark();});
+  const uploadLabel=document.createElement('label');uploadLabel.textContent='Upload PNG, WEBP, JPEG or animated GIF (up to 5 MB)';
+  const uploadInput=document.createElement('input');uploadInput.type='file';uploadInput.accept='image/png,image/webp,image/jpeg,image/gif';
+  uploadLabel.append(uploadInput);panel.append(uploadLabel);
+  const notice=document.createElement('p');notice.className='hint';panel.append(notice);
+  uploadInput.addEventListener('change',async()=>{
+    const file=uploadInput.files?.[0];if(!file)return;
+    if(!['image/png','image/jpeg','image/webp','image/gif'].includes(file.type)||file.size>5*1024*1024){notice.textContent='Please use a PNG, WEBP, JPEG or GIF under 5 MB.';return;}
+    const editEdition=edition;const safeFile=file.name.replace(/[^a-zA-Z0-9._-]/g,'-');
+    const key='death-scenes/'+editEdition+'/'+Date.now()+'-'+safeFile;
+    notice.textContent='Uploading…';uploadInput.disabled=true;
+    try{
+      const {error}=await db.storage.from('quest-art').upload(key,file,{contentType:file.type,upsert:false});
+      if(error)throw error;
+      if(editEdition!==edition){notice.textContent='Upload complete, but you switched editions. Reopen the original edition before assigning it.';return;}
+      const {data:result}=db.storage.from('quest-art').getPublicUrl(key);
+      data.image=result.publicUrl;art.value=data.image;mark();notice.textContent='✓ Image uploaded. Save Draft, Approve, then Publish to make it live.';
+    }catch(err){notice.textContent='Upload failed: '+err.message;}
+    finally{uploadInput.disabled=false;}
+  });
+  const selectLabel=document.createElement('label');selectLabel.textContent='Character / scene animation';
+  const select=document.createElement('select');
+  for(const [value,name] of DEATH_ANIMATIONS){const option=document.createElement('option');option.value=value;option.textContent=name;select.append(option);}
+  select.value=data.animation||'fade';select.addEventListener('change',()=>{data.animation=select.value;mark();});selectLabel.append(select);panel.append(selectLabel);
+  const lengthLabel=document.createElement('label');lengthLabel.textContent='Duration in milliseconds (1200–10000)';
+  const length=document.createElement('input');length.type='number';length.min='1200';length.max='10000';length.step='100';length.value=Number(data.duration)||3500;
+  length.addEventListener('change',()=>{data.duration=Math.min(10000,Math.max(1200,Number(length.value)||3500));length.value=data.duration;mark();});
+  lengthLabel.append(length);panel.append(lengthLabel);
+  return panel;
+}
 function renderNode(){const node=config.nodes[nodeKey];if(!node)return;$('node-location').value=node.location||'';$('node-title').value=node.title||'';$('node-description').value=node.description||'';$('node-ending').value=node.ending||'';const p=node.presentation||={};$('node-background').value=p.background||config.theme.scenes?.[nodeKey]||'';
 $('node-motion').value=p.traveler_motion||'thinking';
 $('node-gnoll').checked=!!p.show_gnoll;$('node-roar').checked=!!p.gnoll_roar;
 $('node-squirrel').checked=!!p.squirrel_eligible;$('node-puppies').checked=!!p.show_puppies;renderSceneCast(p);
-const list=$('choice-editor');list.innerHTML='';(node.choices||[]).forEach((choice,i)=>{const wrap=document.createElement('div');wrap.className='choice';const dests=[...Object.keys(config.nodes).map(key=>[key,config.nodes[key].title||key]),...endings.map(k=>['!'+k,k==='perished'?'BAD — Perished':k.toUpperCase()+' reward'])];wrap.innerHTML=`<div class="choice-head"><strong>Choice ${i+1}</strong><button class="danger small" data-remove="${i}">Remove</button></div><label>Answer text<input class="choice-text" value="${safe(choice.label)}" maxlength="240"></label><label>Next destination<select class="choice-target">${dests.map(([key,label])=>`<option value="${safe(key)}" ${choice.target===key?'selected':''}>${safe(label)} (${safe(key)})</option>`).join('')}</select></label><label class="inline"><input type="checkbox" class="choice-shadow" ${choice.shadow?'checked':''}> Hidden / shadow choice</label>`;wrap.querySelector('.choice-text').addEventListener('input',e=>{choice.label=e.target.value;mark();});wrap.querySelector('.choice-target').addEventListener('change',e=>{choice.target=e.target.value;mark();});wrap.querySelector('.choice-shadow').addEventListener('change',e=>{choice.shadow=e.target.checked;mark();});wrap.querySelector('[data-remove]').addEventListener('click',()=>{node.choices.splice(i,1);mark();renderNode();});list.append(wrap);});}
+const list=$('choice-editor');list.innerHTML='';(node.choices||[]).forEach((choice,i)=>{const wrap=document.createElement('div');wrap.className='choice';const dests=[...Object.keys(config.nodes).map(key=>[key,config.nodes[key].title||key]),...endings.map(k=>['!'+k,k==='perished'?'BAD — Perished':k.toUpperCase()+' reward'])];wrap.innerHTML=`<div class="choice-head"><strong>Choice ${i+1}</strong><button class="danger small" data-remove="${i}">Remove</button></div><label>Answer text<input class="choice-text" value="${safe(choice.label)}" maxlength="240"></label><label>Next destination<select class="choice-target">${dests.map(([key,label])=>`<option value="${safe(key)}" ${choice.target===key?'selected':''}>${safe(label)} (${safe(key)})</option>`).join('')}</select></label><label class="inline"><input type="checkbox" class="choice-shadow" ${choice.shadow?'checked':''}> Hidden / shadow choice</label>`;wrap.querySelector('.choice-text').addEventListener('input',e=>{choice.label=e.target.value;mark();});wrap.querySelector('.choice-target').addEventListener('change',e=>{choice.target=e.target.value;deathPanel.hidden=choice.target!=='!perished';mark();});wrap.querySelector('.choice-shadow').addEventListener('change',e=>{choice.shadow=e.target.checked;mark();});const deathPanel=deathSceneFields(choice);deathPanel.hidden=choice.target!=='!perished';wrap.append(deathPanel);wrap.querySelector('[data-remove]').addEventListener('click',()=>{node.choices.splice(i,1);mark();renderNode();});list.append(wrap);});const immediate=deathSceneFields(node);immediate.hidden=node.ending!=='perished';immediate.id='node-death-editor';list.append(immediate);}
 function renderCopy(){
  ensureCopy();const root=$('copy-editor');root.innerHTML='';
  for(const [section,fields] of Object.entries(DEFAULT_COPY)){
@@ -318,9 +365,19 @@ function renderPreview(key){
  $('preview-location').textContent=node.location||'';$('preview-title').textContent=node.title||key;$('preview-description').textContent=node.description||'';
  previewImage(key);
  let choices=(node.choices||[]).filter(c=>!c.shadow||$('preview-show-shadow').checked);
- if(node.ending){renderPreviewEnding(node.ending);return;}
- for(const c of choices){const b=document.createElement('button');b.textContent=c.label+(c.shadow?' ✦ Hidden route':'');b.addEventListener('click',()=>{if(c.target.startsWith('!'))renderPreviewEnding(c.target.slice(1));else renderPreview(c.target);});$('preview-choices').append(b);}
+ if(node.ending){if(node.ending==='perished' && node.deathScene && (node.deathScene.title||node.deathScene.text||node.deathScene.image))renderPreviewPersonalizedDeath(node.deathScene);else renderPreviewEnding(node.ending);return;}
+ for(const c of choices){const b=document.createElement('button');b.textContent=c.label+(c.shadow?' ✦ Hidden route':'');b.addEventListener('click',()=>{if(c.target==='!perished' && c.deathScene && (c.deathScene.title||c.deathScene.text||c.deathScene.image))renderPreviewPersonalizedDeath(c.deathScene);else if(c.target.startsWith('!'))renderPreviewEnding(c.target.slice(1));else renderPreview(c.target);});$('preview-choices').append(b);}
  const hint=document.createElement('p');hint.className='preview-hint';hint.textContent=copyText('questions','choice_hint')+((node.presentation?.squirrel_eligible)?` · Squirrel chance: ${Math.round((config.appearance?.squirrel_chance??.55)*100)}%`:'')+((node.choices||[]).some(c=>c.shadow)?` · Shadow fight chance: ${Math.round((config.appearance?.shadow_fight_chance??.1)*100)}% per run`:'');$('preview-ending').append(hint);
+}
+function renderPreviewPersonalizedDeath(scene){
+ previewClear();$('preview-stage-label').textContent='CUSTOM DEATH · DRAFT';
+ $('preview-location').textContent='BAD ENDING';
+ $('preview-title').textContent=scene.title||'An Unfortunate Choice';
+ $('preview-description').textContent=scene.text||'';
+ if(scene.image){const img=document.createElement('img');img.className='preview-death-art';img.alt='Custom death scene';img.src=assetSrc(scene.image);$('preview-ending').append(img);}
+ const note=document.createElement('p');note.className='hint';note.textContent=`Animation: ${scene.animation||'fade'} · ${Number(scene.duration)||3500} ms. The real game animates this, then shows YOU PERISHED.`;$('preview-ending').append(note);
+ const b=document.createElement('button');b.textContent='Continue to normal BAD ending';b.addEventListener('click',()=>renderPreviewEnding('perished'));
+ $('preview-choices').append(b);
 }
 function renderPreviewEnding(tier){
  previewClear();$('preview-stage-label').textContent='RESULT · DRAFT';$('preview-location').textContent=copyText('ending','reward_eyebrow');
@@ -400,7 +457,7 @@ function bind(){on('purge-test-edition','click',async()=>{
     console.error('Quest Studio permanent deletion failed',err);
   }
   finally {button.disabled=false;}
-});on('delete-unused-edition','click',()=>deleteUnusedEdition().catch(err=>say('Cannot delete month: '+err.message,true)));on('reload-incomplete-users','click',()=>loadIncompleteUsers());on('edition-picker','change',()=>loadEdition($('edition-picker').value).catch(err=>alert(err.message)));on('new-edition','click',()=>createEdition().catch(err=>alert(err.message)));on('import-autumn','click',()=>importAutumn().catch(err=>alert(err.message)));on('save-draft','click',()=>saveDraft().catch(err=>say(err.message,true)));on('publish-edition','click',()=>publishEdition().catch(err=>say(err.message,true)));on('preview-full-game','click',()=>{if(dirty)return alert('Save Draft first, so the full-page preview can load your changes.');window.open('../?preview_edition='+encodeURIComponent(edition),'_blank','noopener');});on('add-cast','click',addCastCharacter);on('remove-cast','click',removeCastCharacter);on('approve-draft','click',()=>{if(confirm('Approve this editorial snapshot? Review before clicking Publish to make it live.'))saveDraft(true).catch(err=>say(err.message,true));});document.querySelectorAll('.tabs button').forEach(el=>el.addEventListener('click',()=>switchTab(el.dataset.tab)));dataField('edition-title',v=>config.title=v);dataField('edition-season',v=>config.season=v,'change');dataField('accent-color',v=>config.theme.accent=v);dataField('background-color',v=>config.theme.background=v);dataField('edition-description',v=>config.theme.description=v);dataField('squirrel-chance',v=>{if(v==='')return;const n=Number(v);if(n>=0&&n<=100){config.appearance.squirrel_chance=n/100;if(config.cast?.squirrel)config.cast.squirrel.chance=n/100;}});dataField('shadow-chance',v=>{if(v==='')return;const n=Number(v);if(n>=0&&n<=100)config.appearance.shadow_fight_chance=n/100;});dataField('start-node',v=>config.start_node=v,'change');on('node-picker','change',()=>{nodeKey=$('node-picker').value;renderNode();});dataField('node-location',v=>config.nodes[nodeKey].location=v);dataField('node-title',v=>config.nodes[nodeKey].title=v);dataField('node-description',v=>config.nodes[nodeKey].description=v);dataField('node-ending',v=>{if(v)config.nodes[nodeKey].ending=v;else delete config.nodes[nodeKey].ending;},'change');dataField('node-background',v=>{const node=config.nodes[nodeKey];node.presentation ||= {};node.presentation.background=v;config.theme.scenes[nodeKey]=v;});dataField('node-motion',v=>{config.nodes[nodeKey].presentation ||= {};config.nodes[nodeKey].presentation.traveler_motion=v;},'change');
+});on('delete-unused-edition','click',()=>deleteUnusedEdition().catch(err=>say('Cannot delete month: '+err.message,true)));on('reload-incomplete-users','click',()=>loadIncompleteUsers());on('edition-picker','change',()=>loadEdition($('edition-picker').value).catch(err=>alert(err.message)));on('new-edition','click',()=>createEdition().catch(err=>alert(err.message)));on('import-autumn','click',()=>importAutumn().catch(err=>alert(err.message)));on('save-draft','click',()=>saveDraft().catch(err=>say(err.message,true)));on('publish-edition','click',()=>publishEdition().catch(err=>say(err.message,true)));on('preview-full-game','click',()=>{if(dirty)return alert('Save Draft first, so the full-page preview can load your changes.');window.open('../?preview_edition='+encodeURIComponent(edition),'_blank','noopener');});on('add-cast','click',addCastCharacter);on('remove-cast','click',removeCastCharacter);on('approve-draft','click',()=>{if(confirm('Approve this editorial snapshot? Review before clicking Publish to make it live.'))saveDraft(true).catch(err=>say(err.message,true));});document.querySelectorAll('.tabs button').forEach(el=>el.addEventListener('click',()=>switchTab(el.dataset.tab)));dataField('edition-title',v=>config.title=v);dataField('edition-season',v=>config.season=v,'change');dataField('accent-color',v=>config.theme.accent=v);dataField('background-color',v=>config.theme.background=v);dataField('edition-description',v=>config.theme.description=v);dataField('squirrel-chance',v=>{if(v==='')return;const n=Number(v);if(n>=0&&n<=100){config.appearance.squirrel_chance=n/100;if(config.cast?.squirrel)config.cast.squirrel.chance=n/100;}});dataField('shadow-chance',v=>{if(v==='')return;const n=Number(v);if(n>=0&&n<=100)config.appearance.shadow_fight_chance=n/100;});dataField('start-node',v=>config.start_node=v,'change');on('node-picker','change',()=>{nodeKey=$('node-picker').value;renderNode();});dataField('node-location',v=>config.nodes[nodeKey].location=v);dataField('node-title',v=>config.nodes[nodeKey].title=v);dataField('node-description',v=>config.nodes[nodeKey].description=v);dataField('node-ending',v=>{if(v)config.nodes[nodeKey].ending=v;else delete config.nodes[nodeKey].ending;const editor=$('node-death-editor');if(editor)editor.hidden=v!=='perished';},'change');dataField('node-background',v=>{const node=config.nodes[nodeKey];node.presentation ||= {};node.presentation.background=v;config.theme.scenes[nodeKey]=v;});dataField('node-motion',v=>{config.nodes[nodeKey].presentation ||= {};config.nodes[nodeKey].presentation.traveler_motion=v;},'change');
 for(const [id,key] of [['node-gnoll','show_gnoll'],['node-roar','gnoll_roar'],['node-squirrel','squirrel_eligible'],['node-puppies','show_puppies']])on(id,'change',()=>{config.nodes[nodeKey].presentation ||= {};const p=config.nodes[nodeKey].presentation;p[key]=$(id).checked;
  const creature={show_gnoll:'gnoll',squirrel_eligible:'squirrel',show_puppies:'puppies'}[key];
  if(creature){p.characters ||= [];p.characters=p[key]?[...new Set([...p.characters,creature])]:p.characters.filter(x=>x!==creature);}

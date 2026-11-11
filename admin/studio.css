@@ -48,3 +48,11 @@
 .preview-cast{position:absolute;inset:0;pointer-events:none}
 .preview-cast-character{position:absolute;bottom:13px;width:85px;height:95px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(1px 2px 2px #08121baa)}
 .preview-cast-small{height:34px;width:38px}
+
+/* Per-choice death scene editor */
+.death-editor{border:1px solid #a16c57;background:#24212a;padding:14px;border-radius:9px;margin:12px 0}
+.death-editor[hidden]{display:none!important}
+.death-editor h4{color:#f0b38c;margin:0 0 8px}
+.death-editor label{display:grid;margin:8px 0}
+.death-editor input[type=file]{font-size:12px}
+.preview-death-art{display:block;max-height:160px;max-width:100%;object-fit:contain;margin:12px auto;image-rendering:pixelated}

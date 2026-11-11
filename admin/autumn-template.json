@@ -63,7 +63,14 @@
         {
           "label": "Turn around and leave",
           "target": "!perished",
-          "shadow": false
+          "shadow": false,
+          "deathScene": {
+            "title": "Homesick Already?",
+            "text": "Really? Homesick? It's been less than a minute... read Surah Mulk tn gang.",
+            "image": "assets/traveler-walk1.png",
+            "animation": "walk-away",
+            "duration": 3500
+          }
         }
       ],
       "presentation": {
