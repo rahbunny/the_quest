@@ -583,7 +583,7 @@ body.tutorial-open {
 .hub-actions [data-hub-panel="share"].show-retry-hint::before {
   content: "RETRY INFO HERE! ↓";
   position: absolute;
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + 2px);
   left: 50%;
   transform: translateX(-50%);
 
