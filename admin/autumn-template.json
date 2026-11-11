@@ -1,0 +1,556 @@
+{
+  "title": "The Autumn Castle",
+  "season": "autumn",
+  "start_node": "start",
+  "theme": {
+    "accent": "#c46b3c",
+    "background": "#171b22",
+    "map_label": "Autumn Castle",
+    "description": "A quiet forest. A distant castle. Every choice changes the path ahead.",
+    "scenes": {
+      "start": "assets/scene-forest-fork.png",
+      "shaded_path": "assets/scene-forest-shaded.png",
+      "tree_gnoll": "assets/scene-forest-shaded.png",
+      "riddle_success": "assets/scene-forest-shaded.png",
+      "bright_path": "assets/scene-forest-bright.png",
+      "bathing": "assets/scene-forest-bright.png",
+      "after_puppies": "assets/scene-forest-bright.png",
+      "empty_cave": "assets/scene-cave.png",
+      "puppy_cave": "assets/scene-cave.png",
+      "river": "assets/scene-river.png",
+      "castle": "assets/scene-castle.png"
+    },
+    "characters": {
+      "traveler": "assets/traveler-idle.png",
+      "traveler_walk_1": "assets/traveler-walk1.png",
+      "traveler_walk_2": "assets/traveler-walk2.png",
+      "traveler_walk_3": "assets/traveler-walk3.png",
+      "traveler_walk_4": "assets/traveler-walk4.png",
+      "traveler_thinking": "assets/traveler-peek.png",
+      "gnoll": "assets/gnoll-idle.png",
+      "gnoll_roar": "assets/gnoll-roar.png",
+      "squirrel": "assets/squirrel-peek.png",
+      "squirrel_idle": "assets/squirrel-idle.png",
+      "puppies": "assets/reward-legendary.png"
+    },
+    "palette": {
+      "ink": "#f5e9cf",
+      "muted": "#b8aa91",
+      "panel": "#222832",
+      "gold": "#e8b86c",
+      "moss": "#687c55",
+      "line": "#56606a",
+      "night": "#171b22",
+      "rust": "#c46b3c"
+    }
+  },
+  "nodes": {
+    "start": {
+      "location": "THE FOREST FORK",
+      "title": "Three paths beneath the leaves",
+      "description": "The autumn forest parts before you. One trail is dim and overgrown, another glows in the afternoon light. Behind you, the road home is already fading.",
+      "choices": [
+        {
+          "label": "Take the shaded path",
+          "target": "shaded_path",
+          "shadow": false
+        },
+        {
+          "label": "Follow the bright path",
+          "target": "bright_path",
+          "shadow": false
+        },
+        {
+          "label": "Turn around and leave",
+          "target": "!perished",
+          "shadow": false
+        }
+      ],
+      "presentation": {
+        "background": "assets/scene-forest-fork.png",
+        "traveler_motion": "pacing",
+        "show_gnoll": false,
+        "gnoll_roar": false,
+        "squirrel_eligible": true,
+        "show_puppies": false,
+        "characters": [
+          "squirrel"
+        ]
+      }
+    },
+    "shaded_path": {
+      "location": "THE SHADED PATH",
+      "title": "A figure among the trees",
+      "description": "The light thins beneath the branches. Ahead, a gnoll stands in the path. You could approach, ignore him, or hurry toward the brighter trail.",
+      "choices": [
+        {
+          "label": "Approach the tree gnoll",
+          "target": "tree_gnoll",
+          "shadow": false
+        },
+        {
+          "label": "Ignore him and keep walking",
+          "target": "!perished",
+          "shadow": false
+        },
+        {
+          "label": "Dart away toward the bright path",
+          "target": "bright_path",
+          "shadow": false
+        }
+      ],
+      "presentation": {
+        "background": "assets/scene-forest-shaded.png",
+        "traveler_motion": "thinking",
+        "show_gnoll": true,
+        "gnoll_roar": false,
+        "squirrel_eligible": true,
+        "show_puppies": false,
+        "characters": [
+          "gnoll",
+          "squirrel"
+        ]
+      }
+    },
+    "tree_gnoll": {
+      "location": "THE GNOLL’S CLEARING",
+      "title": "The gnoll blocks your way",
+      "description": "The gnoll watches you carefully. He offers a riddle, but there may be another way past him. (Some encounters are rarer than others.)",
+      "choices": [
+        {
+          "label": "Answer his riddle",
+          "target": "riddle_success",
+          "shadow": false
+        },
+        {
+          "label": "Give the wrong answer",
+          "target": "!perished",
+          "shadow": false
+        },
+        {
+          "label": "Fight the gnoll",
+          "target": "puppy_cave",
+          "shadow": true
+        }
+      ],
+      "presentation": {
+        "background": "assets/scene-forest-shaded.png",
+        "traveler_motion": "thinking",
+        "show_gnoll": true,
+        "gnoll_roar": true,
+        "squirrel_eligible": true,
+        "show_puppies": false,
+        "characters": [
+          "gnoll",
+          "squirrel"
+        ]
+      }
+    },
+    "riddle_success": {
+      "location": "BEYOND THE CLEARING",
+      "title": "The gnoll lets you pass",
+      "description": "Your answer satisfies the gnoll. He steps aside, revealing three possible destinations. But the cave is not what it seems...",
+      "choices": [
+        {
+          "label": "Head toward the castle",
+          "target": "castle",
+          "shadow": false
+        },
+        {
+          "label": "Follow the sound of water",
+          "target": "river",
+          "shadow": false
+        },
+        {
+          "label": "Enter the cave",
+          "target": "empty_cave",
+          "shadow": false
+        }
+      ],
+      "presentation": {
+        "background": "assets/scene-forest-shaded.png",
+        "traveler_motion": "pacing",
+        "show_gnoll": true,
+        "gnoll_roar": false,
+        "squirrel_eligible": true,
+        "show_puppies": false,
+        "characters": [
+          "gnoll",
+          "squirrel"
+        ]
+      }
+    },
+    "empty_cave": {
+      "location": "THE EMPTY CAVE",
+      "title": "Something stirs in the dark",
+      "description": "The cave is empty. Before you can turn back, another gnoll emerges from the shadows and crushes you beneath its weight.",
+      "ending": "perished",
+      "choices": [],
+      "presentation": {
+        "background": "assets/scene-cave.png",
+        "traveler_motion": "thinking",
+        "show_gnoll": true,
+        "gnoll_roar": true,
+        "squirrel_eligible": false,
+        "show_puppies": false,
+        "characters": [
+          "gnoll"
+        ]
+      }
+    },
+    "puppy_cave": {
+      "location": "THE HIDDEN CAVE",
+      "title": "A tiny chorus of whimpers",
+      "description": "You overcome the gnoll and discover a hidden den. A litter of puppies huddles together in the warm straw. What will you do?",
+      "choices": [
+        {
+          "label": "Rescue the puppies and take them with you",
+          "target": "!legendary",
+          "shadow": false
+        },
+        {
+          "label": "Leave them and continue onward",
+          "target": "after_puppies",
+          "shadow": false
+        },
+        {
+          "label": "Kill the puppies",
+          "target": "!perished",
+          "shadow": false
+        }
+      ],
+      "presentation": {
+        "background": "assets/scene-cave.png",
+        "traveler_motion": "thinking",
+        "show_gnoll": false,
+        "gnoll_roar": false,
+        "squirrel_eligible": false,
+        "show_puppies": true,
+        "characters": [
+          "puppies"
+        ]
+      }
+    },
+    "after_puppies": {
+      "location": "OUTSIDE THE CAVE",
+      "title": "The path continues",
+      "description": "You leave the puppies undisturbed and step back into the autumn air. The castle rises to one side, while the river winds through the trees on the other.",
+      "choices": [
+        {
+          "label": "Continue toward the castle",
+          "target": "castle",
+          "shadow": false
+        },
+        {
+          "label": "Make your way to the river",
+          "target": "river",
+          "shadow": false
+        }
+      ],
+      "presentation": {
+        "background": "assets/scene-forest-bright.png",
+        "traveler_motion": "pacing",
+        "show_gnoll": false,
+        "gnoll_roar": false,
+        "squirrel_eligible": true,
+        "show_puppies": false,
+        "characters": [
+          "squirrel"
+        ]
+      }
+    },
+    "bright_path": {
+      "location": "THE BRIGHT PATH",
+      "title": "Sunlight through the canopy",
+      "description": "The trees thin and golden light spills across the trail. You hear a river nearby and spot a strange plant growing beside the path.",
+      "choices": [
+        {
+          "label": "Dip your toes in the river",
+          "target": "river",
+          "shadow": false
+        },
+        {
+          "label": "Drink from the strange plant",
+          "target": "!perished",
+          "shadow": false
+        },
+        {
+          "label": "Bathe and follow the path onward",
+          "target": "bathing",
+          "shadow": false
+        }
+      ],
+      "presentation": {
+        "background": "assets/scene-forest-bright.png",
+        "traveler_motion": "pacing",
+        "show_gnoll": false,
+        "gnoll_roar": false,
+        "squirrel_eligible": true,
+        "show_puppies": false,
+        "characters": [
+          "squirrel"
+        ]
+      }
+    },
+    "bathing": {
+      "location": "THE CLEARING",
+      "title": "A place to catch your breath",
+      "description": "Refreshed, you reach a clearing where the castle road branches away from a dark stretch of forest.",
+      "choices": [
+        {
+          "label": "Head toward the castle",
+          "target": "castle",
+          "shadow": false
+        },
+        {
+          "label": "Wander back into the forest",
+          "target": "!perished",
+          "shadow": false
+        }
+      ],
+      "presentation": {
+        "background": "assets/scene-forest-bright.png",
+        "traveler_motion": "pacing",
+        "show_gnoll": false,
+        "gnoll_roar": false,
+        "squirrel_eligible": true,
+        "show_puppies": false,
+        "characters": [
+          "squirrel"
+        ]
+      }
+    },
+    "river": {
+      "location": "THE RIVERBANK",
+      "title": "The river’s offerings",
+      "description": "Clear water runs over smooth stones. A glimmer catches your eye beneath the surface. Nearby, a fish struggles and a turtle has become caught on a hook.",
+      "choices": [
+        {
+          "label": "Reach for the shiny golden pebble",
+          "target": "!basic",
+          "shadow": false
+        },
+        {
+          "label": "Kick away the fish",
+          "target": "!perished",
+          "shadow": false
+        },
+        {
+          "label": "Help the hooked turtle",
+          "target": "!medium",
+          "shadow": false
+        }
+      ],
+      "presentation": {
+        "background": "assets/scene-river.png",
+        "traveler_motion": "thinking",
+        "show_gnoll": false,
+        "gnoll_roar": false,
+        "squirrel_eligible": false,
+        "show_puppies": false,
+        "characters": []
+      }
+    },
+    "castle": {
+      "location": "THE CASTLE",
+      "title": "The castle doors stand open",
+      "description": "You arrive at the castle. From within, you hear footsteps, clattering dishes, and the restless sounds of horses in the stables. Where will you go?",
+      "choices": [
+        {
+          "label": "Sneak into the throne room",
+          "target": "!perished",
+          "shadow": false
+        },
+        {
+          "label": "Scout the stables",
+          "target": "!rare",
+          "shadow": false
+        },
+        {
+          "label": "Raid the kitchen",
+          "target": "!good",
+          "shadow": false
+        }
+      ],
+      "presentation": {
+        "background": "assets/scene-castle.png",
+        "traveler_motion": "thinking",
+        "show_gnoll": false,
+        "gnoll_roar": false,
+        "squirrel_eligible": false,
+        "show_puppies": false,
+        "characters": []
+      }
+    }
+  },
+  "outcomes": {
+    "perished": {
+      "tier": "BAD",
+      "title": "You have perished",
+      "description": "The forest has claimed another adventurer. Share the newsletter with a friend and return for another attempt after the cooldown.",
+      "item": "No item collected"
+    },
+    "basic": {
+      "tier": "BASIC",
+      "title": "Simple but sufficient",
+      "description": "A little treasure, found by keeping your eyes open. Simple, but sufficient.",
+      "item": "Golden Pebble"
+    },
+    "medium": {
+      "tier": "MEDIUM",
+      "title": "Well-deserved",
+      "description": "A kind choice brought you a well-earned keepsake from the river.",
+      "item": "Seashell"
+    },
+    "good": {
+      "tier": "GOOD",
+      "title": "Interesting!",
+      "description": "A sweet reward for a bold little castle raid.",
+      "item": "Cookies"
+    },
+    "rare": {
+      "tier": "RARE",
+      "title": "Unique!",
+      "description": "You found the stables and earned a remarkable companion.",
+      "item": "Horse"
+    },
+    "legendary": {
+      "tier": "LEGENDARY",
+      "title": "Holy smokes",
+      "description": "The secret shadow route led you to a litter of puppies. You rescued them and uncovered the legendary reward!",
+      "item": "Puppies"
+    }
+  },
+  "rewards": {
+    "basic": {
+      "name": "Golden Pebble",
+      "tier": "BASIC",
+      "image": "assets/reward-basic.png"
+    },
+    "medium": {
+      "name": "Seashell",
+      "tier": "MEDIUM",
+      "image": "assets/reward-medium.png"
+    },
+    "good": {
+      "name": "Cookies",
+      "tier": "GOOD",
+      "image": "assets/reward-good.png"
+    },
+    "rare": {
+      "name": "Horse",
+      "tier": "RARE",
+      "image": "assets/reward-rare.png"
+    },
+    "legendary": {
+      "name": "Puppies",
+      "tier": "LEGENDARY",
+      "image": "assets/reward-legendary.png"
+    }
+  },
+  "map": {
+    "label": "The Autumn Castle",
+    "description": "Unlocked: the first known region of the world",
+    "locked": false
+  },
+  "ui_text": {
+    "opening": {
+      "brand": "MONTHLY ADVENTURE",
+      "eyebrow": "A BRANCHING ADVENTURE",
+      "subtitle": "A quiet forest. A distant castle. Every choice changes the path ahead.",
+      "username_question": "What shall we call you, Traveler?",
+      "username_placeholder": "Your adventurer name",
+      "start_button": "ENTER THE FOREST",
+      "return_login": "EXISTING ACCOUNT? SIGN IN",
+      "opening_footer": "BEST EXPERIENCED WITH SOUND OFF AND CURIOSITY ON"
+    },
+    "questions": {
+      "decision_label": "DECISION",
+      "decisions_label": "DECISIONS",
+      "choice_hint": "Choose carefully. The forest remembers.",
+      "lantern_transition": "THE LANTERN GUIDES THE WAY"
+    },
+    "ending": {
+      "cutscene_line_one": "Interesting choices, Traveler…",
+      "cutscene_line_two": "Let's see what you got.",
+      "reward_eyebrow": "YOUR REWARD",
+      "account_prompt": "Save your adventure",
+      "account_help": "Keep this reward across future quests by securing your account with email and password."
+    },
+    "hub": {
+      "welcome_eyebrow": "YOUR JOURNEY CONTINUES",
+      "welcome_prefix": "Well traveled,",
+      "reward_prefix": "You return from the forest with",
+      "result_button": "OPEN RESULT",
+      "share_button": "SHARE",
+      "inventory_button": "INVENTORY",
+      "guild_button": "GUILD",
+      "map_button": "MAP",
+      "result_heading": "QUEST COMPLETE"
+    },
+    "sharing": {
+      "share_heading": "SHARE YOUR STORY",
+      "share_description": "Share your adventure and invite a friend to explore the forest.",
+      "copy_button": "COPY ADVENTURE LINK",
+      "copy_success": "Adventure link copied!",
+      "retry_instructions": "Copy the link to begin your five-minute retry cooldown.",
+      "retry_button": "TRY AGAIN"
+    },
+    "inventory": {
+      "heading": "YOUR INVENTORY",
+      "empty_state": "Your adventure has only just begun. Earn a reward to fill your inventory."
+    },
+    "guild": {
+      "heading": "THE GUILD HALL",
+      "your_standing": "Your standing",
+      "share_rank": "SHARE MY RANK",
+      "load_more": "LOAD MORE",
+      "empty_guild": "No visible members in this guild yet."
+    },
+    "map": {
+      "heading": "WORLD MAP",
+      "intro": "One adventure completed. More lands wait beyond the mist…",
+      "unlocked_label": "DISCOVERED · EDITION 01",
+      "locked_label": "COMING SOON",
+      "future_one": "THE FROSTBOUND NORTH",
+      "future_two": "THE UNKNOWN WILDS",
+      "future_three": "UNMARKED TERRITORY"
+    }
+  },
+  "appearance": {
+    "squirrel_chance": 0.55,
+    "shadow_fight_chance": 0.1,
+    "squirrel_behavior": "peek",
+    "shadow_roll": "once_per_run"
+  },
+  "cast": {
+    "traveler": {
+      "name": "The Traveler",
+      "image": "assets/traveler-idle.png",
+      "action_image": "assets/traveler-walk1.png",
+      "chance": 1,
+      "behavior": "pacing"
+    },
+    "gnoll": {
+      "name": "Forest Gnoll",
+      "image": "assets/gnoll-idle.png",
+      "action_image": "assets/gnoll-roar.png",
+      "chance": 1,
+      "behavior": "menace"
+    },
+    "squirrel": {
+      "name": "Forest Squirrel",
+      "image": "assets/squirrel-peek.png",
+      "action_image": "assets/squirrel-hop.png",
+      "chance": 0.55,
+      "behavior": "peek"
+    },
+    "puppies": {
+      "name": "Puppies",
+      "image": "assets/reward-legendary.png",
+      "action_image": "",
+      "chance": 1,
+      "behavior": "bounce"
+    }
+  }
+}

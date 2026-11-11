@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#171b22" />
+  <title>The Autumn Castle — Adventure v1.4</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app" class="game-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">✦</span><span>MONTHLY ADVENTURE</span></div>
+      <div class="edition-label">EDITION 01 <span>•</span> AUTUMN <span id="auth-header" aria-live="polite"></span></div>
+    </header>
+
+    <section id="screen-home" class="screen active">
+      <div class="scene scene-home">
+        <div class="moon"></div><div class="castle"><i></i><i></i><i></i><b></b></div>
+        <div class="distant-castle-glow"></div>
+        <div class="fog fog-one"></div><div class="fog fog-two"></div><div class="fog fog-three"></div>
+        <div class="pine pine-a"></div><div class="pine pine-b"></div><div class="pine pine-c"></div>
+        <div class="autumn-tree tree-left"></div><div class="autumn-tree tree-right"></div><div class="autumn-tree tree-mid"></div>
+        <div class="ground"></div>
+        <div class="home-lantern" aria-hidden="true"><span>✦</span></div>
+        <div class="home-leaf leaf-home-one" aria-hidden="true">◆</div><div class="home-leaf leaf-home-two" aria-hidden="true">◆</div>
+        <div class="home-copy">
+          <p class="eyebrow">A BRANCHING ADVENTURE</p>
+          <h1>The Autumn<br><em>Castle</em></h1>
+          <p class="intro">A quiet forest. A distant castle. Every choice changes the path ahead.</p>
+          <form id="username-prompt" class="username-prompt" autocomplete="off">
+            <label for="adventurer-name">What shall we call you, Traveler?</label>
+            <input id="adventurer-name" name="adventurer-name" placeholder="Your adventurer name" minlength="2" maxlength="20" required autocomplete="nickname" />
+          </form>
+          <button id="start-btn" class="pixel-button">ENTER THE FOREST <span>→</span></button><div class="home-auth-controls"><button id="home-sign-in" class="secondary-button" type="button">EXISTING ACCOUNT? SIGN IN</button><button id="home-sign-out" class="secondary-button hidden" type="button">SIGN OUT</button></div><p id="home-auth-status" class="microcopy" aria-live="polite"></p>
+          <p class="microcopy">BEST EXPERIENCED WITH SOUND OFF AND CURIOSITY ON</p>
+        </div>
+        <div class="traveler-home-journey" aria-label="The robed traveler walks along the forest path, discovers a lantern, picks it up, and carries it onward" role="img"><div class="home-traveler-sprite"><div class="home-traveler-walk"></div><div class="home-traveler-idle"></div><div class="home-traveler-pickup"></div></div><div class="carried-lantern" aria-hidden="true"><span>✦</span></div></div>
+        <button id="tutorial-toggle" class="tutorial-toggle hidden-tutorial-toggle" type="button" aria-expanded="true">HOW TO PLAY ?</button>
+        <aside id="home-tutorial" class="tutorial-sidecard" aria-label="How to play tutorial">
+          <button id="tutorial-close" class="tutorial-close" type="button" aria-label="Close tutorial">✕</button>
+          <p class="tutorial-kicker">NEW HERE?</p>
+          <h2>Learn the forest fast.</h2>
+          <p class="tutorial-copy">Pick choices to explore the story and try to earn a collectible reward. Different paths can lead to different rankings — but be careful: the forest can make you perish, and then you'll have to try again after the cooldown.</p>
+          <img src="assets/tutorial-autumn-popup.png" alt="Tutorial image showing how to play The Autumn Castle adventure" class="tutorial-art" />
+          <p class="tutorial-footnote">Tip: close this guide anytime and reopen it with the “HOW TO PLAY ?” button.</p>
+        </aside>
+
+      </div>
+    </section>
+
+    <section id="screen-question" class="screen">
+      <div class="game-scene">
+        <div id="scene-backdrop" class="scene-backdrop theme-fork" aria-hidden="true"></div>
+        <div class="scene-pixel-fog" aria-hidden="true"></div>
+        <div id="scene-gnoll" class="scene-gnoll hidden" aria-hidden="true"></div>
+        <div id="scene-puppies" class="scene-puppies hidden" aria-hidden="true"></div>
+        <div id="scene-squirrel" class="scene-squirrel hidden" aria-hidden="true"></div>
+        <div class="traveler" id="traveler" aria-label="Your robed traveler"></div><div id="ambient-layer" class="ambient-layer" aria-hidden="true"></div>
+        <div class="scene-caption"><span id="scene-location">THE OLD FOREST</span><span id="progress-label">0 DECISIONS</span></div>
+      </div>
+      <div class="question-panel">
+        <div class="progress-track"><div id="progress-fill"></div></div>
+        <p class="eyebrow" id="question-kicker">DECISION 01</p>
+        <h2 id="question-title">A path appears...</h2>
+        <p id="question-description" class="question-description"></p>
+        <div id="answers" class="answers"></div>
+        <p class="hint">Choose carefully. The forest remembers.</p>
+      </div>
+    </section>
+
+    <section id="screen-account" class="screen centered-screen">
+      <div class="parchment-card auth-card">
+        <p class="eyebrow">ADVENTURER ACCOUNT</p>
+        <h2 id="auth-title">Create an account</h2>
+        <p id="auth-description">Sign up to keep your adventurer identity across newsletters. Your completed quest will be saved after you confirm your email.</p>
+        <div class="auth-switch" role="group" aria-label="Account mode"><button id="auth-mode-signup" class="tab active" type="button">CREATE ACCOUNT</button><button id="auth-mode-login" class="tab" type="button">SIGN IN</button></div>
+        <form id="account-form">
+          <label id="username-label">Username<input id="username" name="username" minlength="2" maxlength="20" autocomplete="nickname" placeholder="Choose an adventurer name" /></label>
+          <label id="email-label">Email<input id="email" name="email" type="email" required autocomplete="email" placeholder="you@example.com" /></label>
+          <label id="password-label">Password<input id="password" name="password" type="password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters" /></label>
+          <label id="newsletter-label" class="consent"><input id="newsletter-optin" type="checkbox" /> <span>I'd like to receive the newsletter and game updates. Optional — unsubscribe anytime.</span></label>
+          <button id="auth-submit" class="pixel-button" type="submit">CREATE ACCOUNT <span>→</span></button>
+        </form>
+        <p id="auth-feedback" role="status" aria-live="polite" class="auth-feedback"></p>
+        <div class="auth-other"><button type="button" class="secondary-button" id="auth-forgot">RESET PASSWORD</button><button type="button" class="secondary-button" id="auth-back">BACK</button><button type="button" class="secondary-button hidden" id="auth-guest">CONTINUE TO RESULT (SAVE ACCOUNT LATER)</button></div>
+        <p class="microcopy">Your quest is already saved in this browser’s player account. Verify an email, then set a password to keep your items across devices. Newsletter consent is optional and stored in Supabase.</p>
+      </div>
+    </section>
+
+    <section id="screen-hub" class="screen hub-screen">
+      <div class="hub-forest">
+        <div class="hub-mist"></div>
+        <div class="hub-header"><span>EDITION 01 · THE AUTUMN CASTLE</span><div class="hub-header-actions"><button id="hub-account-action" class="hub-small-button">KEEP ACCOUNT / EMAIL</button><button id="hub-open-menu" class="hub-small-button">OPEN RESULT</button></div></div>
+        <div id="fate-cutscene" class="fate-cutscene hidden" role="status"><div class="fate-lantern">✦</div><p>Interesting choices, Traveler…</p><h2>Let's see what you got.</h2></div>
+        <div id="preview-card" class="preview-card hidden" role="status"><p>YOUR REWARD</p><img id="preview-art" src="assets/reward-basic.png" alt=""><span id="preview-tier">BASIC</span><h2 id="preview-title">Simple but sufficient</h2></div>
+        <div id="hub-main" class="hub-main hidden">
+          <div class="hub-welcome"><span class="eyebrow">YOUR JOURNEY CONTINUES</span><h1>Well traveled,<br><span id="hub-name">Traveler</span>.</h1><p>You return from the forest with <strong id="hub-reward-name">a reward</strong>.</p><div class="hub-current-tier">GUILD: <span id="hub-tier">BASIC</span></div></div>
+          <div class="hub-traveler" role="img" aria-label="The Traveler with their newly earned collectible"><div class="hub-traveler-body"></div><img id="hub-held-item" src="assets/reward-basic.png" alt=""></div>
+          <nav class="hub-actions" aria-label="Adventure menu">
+            <button data-hub-panel="share">SHARE</button><button data-hub-panel="inventory">INVENTORY</button><button data-hub-panel="guild">GUILD</button><button data-hub-panel="map">MAP</button>
+          </nav>
+        </div>
+        <div id="hub-modal" class="hub-modal hidden" role="dialog" aria-labelledby="hub-modal-heading" aria-modal="false">
+          <div class="hub-modal-top"><h2 id="hub-modal-heading">QUEST COMPLETE</h2><button id="hub-close" aria-label="Close menu">✕</button></div>
+          <div id="hub-modal-body"></div>
+        </div>
+      </div>
+    </section>
+
+    <div id="transition" class="transition-overlay" aria-hidden="true"><div class="lantern">✦</div><p>THE LANTERN GUIDES THE WAY</p></div>
+    <footer class="footer"><span>A BRANCHING AUTUMN ADVENTURE</span><span>BUILD 1.4 — ADVENTURER IDENTITIES</span></footer>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="quest.js"></script>
+  <script src="game.js"></script>
+  <script src="auth.js"></script>
+
+  <script>
+    (function(){
+      const TUTORIAL_KEY='thequest_tutorial_hidden_v1';
+      function updateTutorial(open){
+        const panel=document.getElementById('home-tutorial');
+        const toggle=document.getElementById('tutorial-toggle');
+        if(!panel||!toggle) return;
+        panel.classList.toggle('tutorial-hidden',!open);
+        toggle.classList.toggle('hidden-tutorial-toggle',open);
+        toggle.setAttribute('aria-expanded',String(open));
+      }
+      document.addEventListener('DOMContentLoaded',()=>{
+        const panel=document.getElementById('home-tutorial');
+        const toggle=document.getElementById('tutorial-toggle');
+        const close=document.getElementById('tutorial-close');
+        if(!panel||!toggle||!close) return;
+        const hidden=localStorage.getItem(TUTORIAL_KEY)==='1';
+        updateTutorial(!hidden);
+        close.addEventListener('click',()=>{ localStorage.setItem(TUTORIAL_KEY,'1'); updateTutorial(false); });
+        toggle.addEventListener('click',()=>{ localStorage.removeItem(TUTORIAL_KEY); updateTutorial(true); });
+      });
+    })();
+  </script>
+
+</body>
+</html>
