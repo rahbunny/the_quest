@@ -172,7 +172,7 @@
     btn.disabled=!copied||retryRemaining()>0;
     btn.textContent=!copied?'COPY LINK TO UNLOCK':seconds?'WAIT TO RETRY':'TRY AGAIN';
     const p=panel.querySelector('p');
-    if(p)p.textContent=!copied?'Copy the link to begin the five-minute cooldown.':
+    if(p)p.textContent=!copied?'Copy the link to begin the two-minute cooldown.':
       seconds?'The forest will reopen when your timer expires.':'Your next adventure is unlocked!';
   }
   async function renderInventory(body){
