@@ -14,7 +14,7 @@ let EDITION = {
       answers: [
         { label: 'Take the shaded path', next: 'shaded_path' },
         { label: 'Follow the bright path', next: 'bright_path' },
-        { label: 'Turn around and leave', ending: 'perished' }
+        { label: 'Turn around and leave', ending: 'perished', deathScene: {title:'Homesick Already?',text:"Really? Homesick? It's been less than a minute... read Surah Mulk tn gang.",image:'assets/traveler-walk1.png',animation:'walk-away',duration:3500} }
       ]
     },
     shaded_path: {
@@ -139,12 +139,12 @@ function applyLiveEdition(payload){
  EDITION.nodes={};
  for(const [key,node] of Object.entries(data.nodes)){
   const answers=(node.choices||[]).filter(choice=>!choice.shadow).map(choice=>({
-   label:choice.label,...(choice.target?.startsWith('!')?{ending:choice.target.slice(1)}:{next:choice.target})
+   label:choice.label,deathScene:choice.deathScene||null,...(choice.target?.startsWith('!')?{ending:choice.target.slice(1)}:{next:choice.target})
   }));
   const shadows=(node.choices||[]).filter(choice=>choice.shadow);
   EDITION.nodes[key]={location:node.location||key,title:node.title,description:node.description,
-   answers,...(node.ending?{ending:node.ending}:{}),
-   shadowAnswers:shadows.map(choice=>({label:choice.label,...(choice.target.startsWith('!')?{ending:choice.target.slice(1)}:{next:choice.target})})),
+   answers,...(node.ending?{ending:node.ending,deathScene:node.deathScene||null}:{}),
+   shadowAnswers:shadows.map(choice=>({label:choice.label,deathScene:choice.deathScene||null,...(choice.target.startsWith('!')?{ending:choice.target.slice(1)}:{next:choice.target})})),
    presentation:node.presentation||{}};
  }
  EDITION.outcomes={};
@@ -198,7 +198,7 @@ function applyLiveEdition(payload){
  if(art)document.documentElement.style.setProperty('--studio-home-backdrop',`url("${artUrl(art)}")`);
 }
 window.applyLiveEdition=applyLiveEdition;
-const state = { nodeId: 'start', decisions: 0, user: null, outcome: null, startedAt: 0, completedAt: 0, shadowRouteAvailable: false, history: [], squirrelVisible: false, squirrelSide: 'left' };
+const state = { nodeId: 'start', decisions: 0, user: null, outcome: null, startedAt: 0, completedAt: 0, shadowRouteAvailable: false, history: [], pendingDeathScene:null, squirrelVisible: false, squirrelSide: 'left' };
 const $ = (id) => document.getElementById(id);
 const screens = ['home','question','account','hub'];
 function showScreen(name){ screens.forEach(s => $('screen-'+s).classList.toggle('active',s===name)); }
@@ -232,6 +232,40 @@ async function playPerishScene(){
   if(questionScreen) questionScreen.classList.remove('death-scene-active');
   overlay.classList.remove('show');
 }
+// Optional personalized scene for the exact fatal choice. Runs only after the server
+// has verified and saved the failed run; rewards and retry permissions are unchanged.
+function validDeathArt(path){
+  const raw=String(path||'').trim();
+  if(!raw)return '';
+  if(raw.startsWith('assets/') && !raw.includes('..') && !/[\\?#]/.test(raw))return raw;
+  try{const u=new URL(raw);if(u.protocol==='https:')return u.href;}catch(_e){}
+  return '';
+}
+async function playCustomDeathScene(data){
+  if(!data || !(data.title||data.text||data.image))return;
+  const style=['fade','walk-away','shake','fall','spin','flash','float'].includes(data.animation)?data.animation:'fade';
+  const duration=Math.min(10000,Math.max(1200,Number(data.duration)||3500));
+  let screen=$('custom-death-scene');
+  if(!screen){
+    screen=document.createElement('div'); screen.id='custom-death-scene';
+    screen.className='custom-death-scene'; screen.setAttribute('role','status');
+    screen.setAttribute('aria-live','polite');
+    screen.innerHTML='<div class="death-story-stage"><p class="death-story-eyebrow">AN UNFORTUNATE CHOICE</p><div class="death-story-art-wrap"><img class="death-story-art" alt="Death scene character"></div><h2 class="death-story-title"></h2><p class="death-story-text"></p></div>';
+    document.body.append(screen);
+  }
+  const title=screen.querySelector('.death-story-title');
+  const message=screen.querySelector('.death-story-text');
+  const img=screen.querySelector('.death-story-art');
+  title.textContent=String(data.title||'An Unfortunate Choice');
+  message.textContent=String(data.text||'');
+  const src=validDeathArt(data.image)||'assets/traveler-idle.png';
+  img.hidden=false;
+  img.src=src;
+  screen.dataset.animation=style;
+  screen.classList.add('active');
+  try{await new Promise(resolve=>setTimeout(resolve,duration));}
+  finally{screen.classList.remove('active');screen.removeAttribute('data-animation');}
+}
 function ensureTravelerSprite(){
   const traveler = $('traveler');
   if(!traveler) return null;
@@ -262,7 +296,7 @@ function renderStudioCharacters(scene){
 async function startGame(){
   try{await window.adventureQuest.begin();}
   catch(err){alert('Cannot start the adventure right now: '+err.message);return;}
-  state.nodeId=ACTIVE_STUDIO_CONFIG?.start_node||'start'; state.decisions=0; state.startedAt=Date.now(); state.completedAt=0; state.outcome=null; state.history=[]; state.restoredCompletion=false;
+  state.nodeId=ACTIVE_STUDIO_CONFIG?.start_node||'start'; state.decisions=0; state.startedAt=Date.now(); state.completedAt=0; state.outcome=null; state.history=[]; state.pendingDeathScene=null; state.restoredCompletion=false;
   state.shadowRouteAvailable = window.adventureQuest.shadowEnabled;
   showNode();
 }
@@ -320,7 +354,7 @@ function showNode(){
     button.addEventListener('click',()=>chooseAnswer(answer));
     answers.appendChild(button);
   });
-  if(node.ending){finish(node.ending);return;}
+  if(node.ending){state.pendingDeathScene=node.ending==='perished'?(node.deathScene||null):null;finish(node.ending);return;}
   showScreen('question');
   spawnRouteAmbience();
 }
@@ -352,7 +386,7 @@ function spawnRouteAmbience(){
 }
 function chooseAnswer(answer){
   state.history.push({node:state.nodeId,choice:answer.label}); state.decisions++;
-  if(answer.ending){finish(answer.ending);return;}
+  if(answer.ending){state.pendingDeathScene=answer.ending==='perished'?(answer.deathScene||null):null;finish(answer.ending);return;}
   if(!answer.next || !EDITION.nodes[answer.next]){finish('perished');return;}
   $('traveler').classList.add('is-walking');
   transition(()=>{state.nodeId=answer.next;showNode();});
@@ -363,6 +397,11 @@ async function finish(outcome){
     if(verified!==outcome) throw new Error('Server-verified outcome did not match the story.');
   }catch(err){alert('Your result could not be verified and saved yet: '+err.message);return;}
   state.outcome=outcome; state.restoredCompletion=false; state.completedAt=Date.now();
+  if(outcome==='perished'){
+    // Show the per-choice story first, then the established shake / black-out.
+    await playCustomDeathScene(state.pendingDeathScene);
+    await playPerishScene();
+  }
   // A short interlude BEFORE the 5-second prize reveal.
   showScreen('hub');
   $('hub-main').classList.add('hidden');
