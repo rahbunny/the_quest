@@ -172,14 +172,14 @@ async function deleteUnusedEdition(){
  if(dirty) throw Error('Save or discard your unsaved changes before deleting a month.');
  const target=edition;
  const meta=entries.find(x=>x.id===target);
- if(meta?.status==='active') throw Error('You cannot delete the live edition.');
- const typed=prompt(`PERMANENTLY DELETE the unused edition ${meta?.title||target} (${target})?\nOnly never-published months with no player activity can be removed.\nType the exact edition ID to confirm:`);
+ if(meta?.status==='active') throw Error('This is the live month. Publish the edition you want to keep first, then return here to delete this one.');
+ const typed=prompt(`PERMANENTLY DELETE ${meta?.title||target} (${target})?\n\nPreviously published editions can be deleted only when NO player runs, rewards, or inventory are linked to them. This is permanent.\n\nType the exact edition ID to confirm:`);
  if(typed!==target){say('Month deletion cancelled.');return;}
  const {data,error}=await db.rpc('quest_studio_delete_unused_edition',{p_edition_id:target});
  if(error)throw error;
  dirty=false;
- say(`Deleted unused month ${data?.edition_id||target}.`);
  await loadEditions();
+ say(`✓ Deleted month ${data?.edition_id||target}.`);
 }
 async function loadIncompleteUsers(){
  const tbody=$('incomplete-user-list'), status=$('incomplete-user-status');
