@@ -451,9 +451,30 @@ function openHub(){
   $('hub-modal-body').innerHTML='';
   showHubPanel('reward');
   showScreen('hub');
+  
+  // Show a retry hint only after a BAD ending.
+  const shareButton = document.querySelector(
+    '[data-hub-panel="share"]'
+  );
+
+  if (shareButton) {
+    shareButton.classList.toggle(
+      'show-retry-hint',
+      state.outcome === 'perished'
+    );
+  }
+
   window.adventureQuest?.refreshRetryUI();
 }
 function showHubPanel(panel){
+  
+  // Hide the retry hint after the player opens Share.
+  if (panel === 'share') {
+    document.querySelector(
+      '[data-hub-panel="share"]'
+    )?.classList.remove('show-retry-hint');
+  }
+
   const body=$('hub-modal-body');
   const out=EDITION.outcomes[state.outcome];
   $('hub-modal').classList.remove('hidden');
