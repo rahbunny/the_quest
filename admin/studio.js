@@ -181,6 +181,41 @@ async function deleteUnusedEdition(){
  await loadEditions();
  say(`✓ Deleted month ${data?.edition_id||target}.`);
 }
+async function purgeTestEdition(){
+ if(!edition) throw Error('Select an edition first.');
+ if(dirty) throw Error('Save or discard unsaved changes before deleting a month.');
+ const target=edition;
+ const meta=entries.find(x=>x.id===target);
+ if(meta?.status==='active') throw Error('You cannot delete the LIVE edition. Publish a different edition first.');
+ say('Checking exactly what would be removed…');
+ const {data:impact,error:impactError}=await db.rpc('quest_studio_preview_edition_purge',{p_edition_id:target});
+ if(impactError)throw impactError;
+ if(impact?.status==='active')throw Error('This edition is LIVE. Publish another one first.');
+ const label=[
+  `Edition: ${impact?.title||target} (${target})`,
+  `Completed/unfinished attempts: ${Number(impact?.game_attempts||0)+Number(impact?.dynamic_runs||0)+Number(impact?.guest_runs||0)}`,
+  `Winning locks: ${impact?.edition_wins||0}`,
+  `Earned inventory entries: ${impact?.inventory_items||0}`,
+  `Guild moderation records: ${impact?.guild_moderation||0}`,
+  `Collectible catalog entries: ${impact?.collectible_definitions||0}`,
+  'Player accounts and all OTHER editions will be kept.',
+  '',
+  'This permanently erases this edition and its player history. It CANNOT be undone.',
+  '',
+  `Type DELETE ${target} exactly to confirm:`
+ ].join('\n');
+ const typed=prompt(label);
+ if(typed!==`DELETE ${target}`){say('Permanent deletion cancelled; nothing was changed.');return;}
+ if(!confirm(`FINAL WARNING: Permanently erase ${target} and all runs, prizes and history belonging to it?\n\nThis cannot be undone.`)){
+  say('Permanent deletion cancelled; nothing was changed.');return;
+ }
+ say(`Permanently deleting ${target}…`);
+ const {data,error}=await db.rpc('quest_studio_purge_test_edition',{p_edition_id:target,p_confirmation:typed});
+ if(error)throw error;
+ dirty=false;
+ await loadEditions();
+ say(`✓ Permanently deleted ${data?.edition_id||target} and its associated edition history.`);
+}
 async function loadIncompleteUsers(){
  const tbody=$('incomplete-user-list'), status=$('incomplete-user-status');
  if(!tbody||!status)return;
@@ -352,7 +387,7 @@ async function publishEdition(){
   alert('Quest Studio could not verify publication.\n\n'+e.message+'\n\nYour approved draft is unchanged.');
  }finally{$('publish-edition').disabled=false;}
 }
-function bind(){on('delete-unused-edition','click',()=>deleteUnusedEdition().catch(err=>say('Cannot delete month: '+err.message,true)));on('reload-incomplete-users','click',()=>loadIncompleteUsers());on('edition-picker','change',()=>loadEdition($('edition-picker').value).catch(err=>alert(err.message)));on('new-edition','click',()=>createEdition().catch(err=>alert(err.message)));on('import-autumn','click',()=>importAutumn().catch(err=>alert(err.message)));on('save-draft','click',()=>saveDraft().catch(err=>say(err.message,true)));on('publish-edition','click',()=>publishEdition().catch(err=>say(err.message,true)));on('preview-full-game','click',()=>{if(dirty)return alert('Save Draft first, so the full-page preview can load your changes.');window.open('../?preview_edition='+encodeURIComponent(edition),'_blank','noopener');});on('add-cast','click',addCastCharacter);on('remove-cast','click',removeCastCharacter);on('approve-draft','click',()=>{if(confirm('Approve this editorial snapshot? Review before clicking Publish to make it live.'))saveDraft(true).catch(err=>say(err.message,true));});document.querySelectorAll('.tabs button').forEach(el=>el.addEventListener('click',()=>switchTab(el.dataset.tab)));dataField('edition-title',v=>config.title=v);dataField('edition-season',v=>config.season=v,'change');dataField('accent-color',v=>config.theme.accent=v);dataField('background-color',v=>config.theme.background=v);dataField('edition-description',v=>config.theme.description=v);dataField('squirrel-chance',v=>{if(v==='')return;const n=Number(v);if(n>=0&&n<=100){config.appearance.squirrel_chance=n/100;if(config.cast?.squirrel)config.cast.squirrel.chance=n/100;}});dataField('shadow-chance',v=>{if(v==='')return;const n=Number(v);if(n>=0&&n<=100)config.appearance.shadow_fight_chance=n/100;});dataField('start-node',v=>config.start_node=v,'change');on('node-picker','change',()=>{nodeKey=$('node-picker').value;renderNode();});dataField('node-location',v=>config.nodes[nodeKey].location=v);dataField('node-title',v=>config.nodes[nodeKey].title=v);dataField('node-description',v=>config.nodes[nodeKey].description=v);dataField('node-ending',v=>{if(v)config.nodes[nodeKey].ending=v;else delete config.nodes[nodeKey].ending;},'change');dataField('node-background',v=>{const node=config.nodes[nodeKey];node.presentation ||= {};node.presentation.background=v;config.theme.scenes[nodeKey]=v;});dataField('node-motion',v=>{config.nodes[nodeKey].presentation ||= {};config.nodes[nodeKey].presentation.traveler_motion=v;},'change');
+function bind(){on('purge-test-edition','click',()=>purgeTestEdition().catch(err=>say('Cannot permanently delete month: '+err.message,true)));on('delete-unused-edition','click',()=>deleteUnusedEdition().catch(err=>say('Cannot delete month: '+err.message,true)));on('reload-incomplete-users','click',()=>loadIncompleteUsers());on('edition-picker','change',()=>loadEdition($('edition-picker').value).catch(err=>alert(err.message)));on('new-edition','click',()=>createEdition().catch(err=>alert(err.message)));on('import-autumn','click',()=>importAutumn().catch(err=>alert(err.message)));on('save-draft','click',()=>saveDraft().catch(err=>say(err.message,true)));on('publish-edition','click',()=>publishEdition().catch(err=>say(err.message,true)));on('preview-full-game','click',()=>{if(dirty)return alert('Save Draft first, so the full-page preview can load your changes.');window.open('../?preview_edition='+encodeURIComponent(edition),'_blank','noopener');});on('add-cast','click',addCastCharacter);on('remove-cast','click',removeCastCharacter);on('approve-draft','click',()=>{if(confirm('Approve this editorial snapshot? Review before clicking Publish to make it live.'))saveDraft(true).catch(err=>say(err.message,true));});document.querySelectorAll('.tabs button').forEach(el=>el.addEventListener('click',()=>switchTab(el.dataset.tab)));dataField('edition-title',v=>config.title=v);dataField('edition-season',v=>config.season=v,'change');dataField('accent-color',v=>config.theme.accent=v);dataField('background-color',v=>config.theme.background=v);dataField('edition-description',v=>config.theme.description=v);dataField('squirrel-chance',v=>{if(v==='')return;const n=Number(v);if(n>=0&&n<=100){config.appearance.squirrel_chance=n/100;if(config.cast?.squirrel)config.cast.squirrel.chance=n/100;}});dataField('shadow-chance',v=>{if(v==='')return;const n=Number(v);if(n>=0&&n<=100)config.appearance.shadow_fight_chance=n/100;});dataField('start-node',v=>config.start_node=v,'change');on('node-picker','change',()=>{nodeKey=$('node-picker').value;renderNode();});dataField('node-location',v=>config.nodes[nodeKey].location=v);dataField('node-title',v=>config.nodes[nodeKey].title=v);dataField('node-description',v=>config.nodes[nodeKey].description=v);dataField('node-ending',v=>{if(v)config.nodes[nodeKey].ending=v;else delete config.nodes[nodeKey].ending;},'change');dataField('node-background',v=>{const node=config.nodes[nodeKey];node.presentation ||= {};node.presentation.background=v;config.theme.scenes[nodeKey]=v;});dataField('node-motion',v=>{config.nodes[nodeKey].presentation ||= {};config.nodes[nodeKey].presentation.traveler_motion=v;},'change');
 for(const [id,key] of [['node-gnoll','show_gnoll'],['node-roar','gnoll_roar'],['node-squirrel','squirrel_eligible'],['node-puppies','show_puppies']])on(id,'change',()=>{config.nodes[nodeKey].presentation ||= {};const p=config.nodes[nodeKey].presentation;p[key]=$(id).checked;
  const creature={show_gnoll:'gnoll',squirrel_eligible:'squirrel',show_puppies:'puppies'}[key];
  if(creature){p.characters ||= [];p.characters=p[key]?[...new Set([...p.characters,creature])]:p.characters.filter(x=>x!==creature);}
