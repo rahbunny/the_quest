@@ -626,3 +626,32 @@ body.tutorial-open {
   }
 }
 
+
+
+/* Responsive layout hardening for narrow screens and browser viewport differences */
+@media (max-width: 860px) {
+  .game-shell { width: 100%; max-width: 100%; padding-left: clamp(8px, 3vw, 16px); padding-right: clamp(8px, 3vw, 16px); }
+  .topbar, .footer { gap: 10px; flex-wrap: wrap; }
+  .edition-label { text-align: right; max-width: 100%; overflow-wrap: anywhere; }
+  .hub-actions { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: clamp(6px, 2vw, 10px) !important; padding: clamp(10px, 3vw, 18px) !important; }
+  .hub-actions button, .hub-actions .secondary-button, .home-auth-controls button, .auth-other button { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; line-height: 1.5; }
+  .home-auth-controls, .auth-other, .auth-switch { display: flex; flex-wrap: wrap; gap: 8px; }
+  .home-auth-controls > *, .auth-other > * { flex: 1 1 140px; }
+  .question-panel { padding: clamp(12px, 4vw, 22px) !important; }
+  .pixel-button, .secondary-button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+  .retry-panel { width: 100%; box-sizing: border-box; padding: clamp(10px, 3vw, 16px); }
+}
+@media (max-width: 480px) {
+  .topbar { align-items: flex-start; }
+  .brand, .edition-label { font-size: clamp(7px, 2.5vw, 9px); letter-spacing: .6px; }
+  .hub-actions { grid-template-columns: 1fr !important; }
+  .hub-actions button { min-height: 42px; padding: 10px 8px; font-size: clamp(7px, 2.7vw, 9px); }
+  .home-auth-controls > *, .auth-other > * { flex-basis: 100%; }
+  #tutorial-toggle.tutorial-toggle { right: 10px; bottom: 10px; max-width: calc(100vw - 20px); }
+}
+@supports (padding: max(0px)) {
+  @media (max-width: 860px) {
+    .game-shell { padding-left: max(8px, env(safe-area-inset-left)); padding-right: max(8px, env(safe-area-inset-right)); }
+    #tutorial-toggle.tutorial-toggle { bottom: max(10px, env(safe-area-inset-bottom)); }
+  }
+}

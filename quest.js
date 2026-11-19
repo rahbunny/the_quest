@@ -102,7 +102,7 @@
     }
     if(status?.blocked){
       restoreFailedRun(status);
-      throw new Error(copied?'Your five-minute retry timer is still running.':'Copy the adventure link before retrying.');
+      throw new Error(copied?'Your two-minute retry timer is still running.':'Copy the adventure link before retrying.');
     }
     const {data,error}=await getClient().rpc(live?'quest_begin_live':'start_guest_quest');
     if(error)throw error;
@@ -168,7 +168,7 @@
     if(!panel||!clock||!btn)return;
     let seconds=Math.ceil(retryRemaining()/1000);
     clock.textContent=copied?
-      `${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`:'05:00';
+      `${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`:'02:00';
     btn.disabled=!copied||retryRemaining()>0;
     btn.textContent=!copied?'COPY LINK TO UNLOCK':seconds?'WAIT TO RETRY':'TRY AGAIN';
     const p=panel.querySelector('p');
