@@ -172,8 +172,14 @@ function applyLiveEdition(payload){
  for(const [panel,key] of Object.entries(buttons)){const b=document.querySelector(`[data-hub-panel="${panel}"]`);if(b)b.textContent=uiCopy('hub',key,b.textContent);}
  const resultBtn=$('hub-open-menu');if(resultBtn)resultBtn.textContent=uiCopy('hub','result_button',resultBtn.textContent);
  const hubTitle=document.querySelector('.hub-header span');if(hubTitle)hubTitle.textContent=`${data.season?.toUpperCase()||'QUEST'} · ${data.title}`;
- const seasonLabel=document.getElementById('season-label');
- if(seasonLabel)seasonLabel.textContent=data.season?.toUpperCase()||'EDITION';
+ const label=document.querySelector('.edition-label');
+ if(label){
+  // Preserve #auth-header: auth.js uses it when a player signs in or starts anonymously.
+  const seasonLabel=label.firstChild;
+  if(seasonLabel && seasonLabel.nodeType===Node.TEXT_NODE){
+   seasonLabel.textContent=`${data.season?.toUpperCase()||'EDITION'} `;
+  }
+ }
 
  const palette=data.theme?.palette||{};
  const cssVars={ink:'--ink',muted:'--muted',night:'--night',panel:'--panel',rust:'--rust',gold:'--gold',moss:'--moss',line:'--line'};
@@ -405,7 +411,12 @@ async function finish(outcome){
   state.fateTimer=setTimeout(()=>{
     $('fate-cutscene').classList.add('hidden');
     showRewardPreview();
-    state.accountPromptTimer=setTimeout(showAccount,5000);
+    // After the reward reveal, automatically open the next destination:
+    // successful runs go to Guild assignment; perished runs go to Share.
+    state.accountPromptTimer=setTimeout(()=>{
+      openHub();
+      showHubPanel(outcome==='perished'?'share':'guild');
+    },5000);
   },2700);
 }
 function showRewardPreview(){
